@@ -162,7 +162,7 @@ func main() {
 	switch inputExt {
 	case ".json":
 		err = processJsonSub(inputPath, outputPath)
-	case ".srt", ".ass":
+	case ".srt", ".ass", ".vtt":
 		err = processSrtSub(inputPath, outputPath)
 	default:
 		fmt.Printf("\"%s\" file type is not supported\n", inputExt)
