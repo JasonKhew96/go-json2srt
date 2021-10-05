@@ -85,8 +85,8 @@ func json2srt(inputPath, outputPath string) error {
 	return newSub.WriteToSRT(f)
 }
 
-// srt2json converts srt subtitle into json subtitle
-func srt2json(inputPath, outputPath string) error {
+// any2json converts srt subtitle into json subtitle
+func any2json(inputPath, outputPath string) error {
 	sub, err := astisub.OpenFile(inputPath)
 	if err != nil {
 		return err
@@ -124,6 +124,28 @@ func srt2json(inputPath, outputPath string) error {
 	return os.WriteFile(outputPath, data, 0666)
 }
 
+// processJsonSub process json subtitle
+func processJsonSub(inputPath, outputPath string) error {
+	outputExt := strings.ToLower(filepath.Ext(outputPath))
+	switch outputExt {
+	case ".srt":
+		return json2srt(inputPath, outputPath)
+	default:
+		return fmt.Errorf("\"%s\" file type is not supported", outputExt)
+	}
+}
+
+// processSrtSub process srt subtitle
+func processSrtSub(inputPath, outputPath string) error {
+	outputExt := strings.ToLower(filepath.Ext(outputPath))
+	switch outputExt {
+	case ".json":
+		return any2json(inputPath, outputPath)
+	default:
+		return fmt.Errorf("\"%s\" file type is not supported", outputExt)
+	}
+}
+
 func main() {
 	arguments := os.Args[1:]
 	argsLen := len(arguments)
@@ -137,20 +159,11 @@ func main() {
 	var err error
 
 	inputExt := strings.ToLower(filepath.Ext(inputPath))
-	outputExt := strings.ToLower(filepath.Ext(outputPath))
 	switch inputExt {
 	case ".json":
-		if outputExt == ".srt" {
-			err = json2srt(inputPath, outputPath)
-		} else {
-			err = fmt.Errorf("\"%s\" file type is not supported", inputExt)
-		}
-	case ".srt":
-		if outputExt == ".json" {
-			err = srt2json(inputPath, outputPath)
-		} else {
-			err = fmt.Errorf("\"%s\" file type is not supported", inputExt)
-		}
+		err = processJsonSub(inputPath, outputPath)
+	case ".srt", ".ass":
+		err = processSrtSub(inputPath, outputPath)
 	default:
 		fmt.Printf("\"%s\" file type is not supported\n", inputExt)
 		return
